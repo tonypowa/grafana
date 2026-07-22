@@ -50,8 +50,7 @@ func NewSearchOptions(
 	ownsIndexFn func(key resource.NamespacedResource) (bool, error),
 	snapshotStore RemoteIndexStore,
 ) (resource.SearchOptions, error) {
-	//nolint:staticcheck // not yet migrated to OpenFeature
-	if cfg.EnableSearch || features.IsEnabledGlobally(featuremgmt.FlagProvisioning) {
+	if cfg.EnableSearch {
 		root := cfg.IndexPath
 		if root == "" {
 			root = filepath.Join(cfg.DataPath, "unified-search", "bleve")
