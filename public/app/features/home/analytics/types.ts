@@ -20,6 +20,8 @@ export interface RecommendationEnableClicked extends EventProperty {
   recommendation_id: string;
   /** Which homepage surface fired the CTA. */
   source: 'card' | 'pill';
+  /** CTA intent: enable a disabled app, or set up an enabled app with no data yet. */
+  cta?: 'enable' | 'setup';
 }
 
 export interface NoDataCtaClicked extends EventProperty {

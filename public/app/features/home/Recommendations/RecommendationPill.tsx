@@ -21,7 +21,13 @@ export function RecommendationPill({ recommendation }: RecommendationPillProps) 
       fill="solid"
       icon={recommendation.icon}
       href={recommendation.href}
-      onClick={() => recommendationEnableClicked({ recommendation_id: recommendation.id, source: 'pill' })}
+      onClick={() =>
+        recommendationEnableClicked({
+          recommendation_id: recommendation.id,
+          source: 'pill',
+          cta: recommendation.cta ?? 'enable',
+        })
+      }
       className={styles.pill}
     >
       {recommendation.action}

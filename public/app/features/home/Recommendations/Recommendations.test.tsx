@@ -14,6 +14,7 @@ import {
   fetchKubernetesInventory,
   resolveKubernetesDatasource,
 } from './kubernetesData';
+import { hasSolutionData } from './solutionDataProbes';
 
 const mockGet = jest.fn();
 jest.mock('@grafana/runtime', () => ({
@@ -41,6 +42,12 @@ jest.mock('./kubernetesData', () => ({
   fetchClusterCpuSeries: jest.fn().mockResolvedValue(null),
 }));
 
+// Enabled solutions report data by default so the pre-probe expectations (enabled -> hidden)
+// keep holding; individual tests flip specific solutions to the no-data state.
+jest.mock('./solutionDataProbes', () => ({
+  hasSolutionData: jest.fn().mockResolvedValue(true),
+}));
+
 const APP_IDS = [
   'grafana-exploretraces-app',
   'grafana-synthetic-monitoring-app',
@@ -50,7 +57,7 @@ const APP_IDS = [
 const listItem = (id: string, overrides: Partial<LocalPlugin> = {}) => ({
   id,
   enabled: false,
-  accessControl: { [AccessControlAction.PluginsWrite]: true },
+  accessControl: { [AccessControlAction.PluginsWrite]: true, [AccessControlAction.PluginsAppAccess]: true },
   ...overrides,
 });
 
@@ -66,6 +73,8 @@ beforeEach(() => {
   });
   mockGet.mockReset();
   mockGet.mockResolvedValue(APP_IDS.map((id) => listItem(id)));
+  jest.mocked(hasSolutionData).mockReset();
+  jest.mocked(hasSolutionData).mockResolvedValue(true);
   jest.spyOn(contextSrv, 'hasPermission').mockReturnValue(true);
 });
 
@@ -106,7 +115,7 @@ describe('Recommendations', () => {
     expect(mockUsePluginBridge).not.toHaveBeenCalled();
   });
 
-  it('drops recommendations whose app is already enabled', async () => {
+  it('drops recommendations whose app is already enabled and receiving data', async () => {
     mockGet.mockResolvedValue(
       APP_IDS.map((id) =>
         listItem(id, {
@@ -119,6 +128,48 @@ describe('Recommendations', () => {
 
     expect(await screen.findByRole('link', { name: /Enable Application Observability/ })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /Enable Hosted Traces/ })).not.toBeInTheDocument();
+  });
+
+  it('keeps recommending an enabled app that has no data, with a setup CTA into the app', async () => {
+    jest
+      .mocked(hasSolutionData)
+      .mockImplementation(async (pluginId: string) => pluginId !== 'grafana-synthetic-monitoring-app');
+    mockGet.mockResolvedValue(APP_IDS.map((id) => listItem(id, { enabled: true })));
+
+    render(<Recommendations />);
+
+    const setupLink = await screen.findByRole('link', { name: /Set up Synthetic Monitoring/, hidden: true });
+    expect(setupLink).toHaveAttribute('href', '/a/grafana-synthetic-monitoring-app');
+    expect(screen.queryByRole('link', { name: /Enable Hosted Traces/, hidden: true })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Add Synthetic Monitoring/, hidden: true })).not.toBeInTheDocument();
+  });
+
+  it('hides the section when every enabled app has data', async () => {
+    mockGet.mockResolvedValue(APP_IDS.map((id) => listItem(id, { enabled: true })));
+
+    const { container } = render(<Recommendations />);
+
+    await waitFor(() => expect(container).toBeEmptyDOMElement());
+  });
+
+  it('hides the setup card when the user lacks app access to the silent app', async () => {
+    jest.mocked(hasSolutionData).mockResolvedValue(false);
+    mockGet.mockResolvedValue(
+      APP_IDS.map((id) =>
+        listItem(id, {
+          enabled: true,
+          accessControl:
+            id === 'grafana-synthetic-monitoring-app'
+              ? { [AccessControlAction.PluginsWrite]: true }
+              : { [AccessControlAction.PluginsWrite]: true, [AccessControlAction.PluginsAppAccess]: true },
+        })
+      )
+    );
+
+    render(<Recommendations />);
+
+    expect(await screen.findByRole('link', { name: /Set up Hosted Traces/, hidden: true })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Set up Synthetic Monitoring/, hidden: true })).not.toBeInTheDocument();
   });
 
   it('shows installed-but-disabled cards but hides not-installed cards for a write-only user', async () => {

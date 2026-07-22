@@ -39,7 +39,13 @@ export function RecommendationCard({ recommendation }: RecommendationCardProps) 
           icon="arrow-right"
           iconPlacement="right"
           href={recommendation.href}
-          onClick={() => recommendationEnableClicked({ recommendation_id: recommendation.id, source: 'card' })}
+          onClick={() =>
+            recommendationEnableClicked({
+              recommendation_id: recommendation.id,
+              source: 'card',
+              cta: recommendation.cta ?? 'enable',
+            })
+          }
         >
           {recommendation.action}
         </LinkButton>
