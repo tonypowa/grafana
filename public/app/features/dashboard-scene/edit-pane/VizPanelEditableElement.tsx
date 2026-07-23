@@ -38,7 +38,7 @@ function useEditPaneOptions(this: VizPanelEditableElement, isNewElement: boolean
   const backgroundId = useId();
 
   const panelOptions = useMemo(() => {
-    return new OptionsPaneCategoryDescriptor({ title: '', id: 'panel-options' })
+    return new OptionsPaneCategoryDescriptor({ title: '', id: 'Panel options' })
       .addItem(
         new OptionsPaneItemDescriptor({
           title: t('dashboard.viz-panel.options.title-option', 'Title'),

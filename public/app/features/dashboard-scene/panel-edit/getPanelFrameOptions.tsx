@@ -264,7 +264,7 @@ export function PanelDescriptionTextArea({ panel, id }: { panel: VizPanel; id?: 
       {/* eslint-disable-next-line @grafana/require-no-margin */}
       <Field
         label={label}
-        data-testid={selectors.components.PanelEditor.OptionsPane.fieldLabel('panel-options Description')}
+        data-testid={selectors.components.PanelEditor.OptionsPane.fieldLabel('Panel options Description')}
       >
         <TextArea
           id={id}
