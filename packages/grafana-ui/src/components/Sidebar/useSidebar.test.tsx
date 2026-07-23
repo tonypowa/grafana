@@ -316,4 +316,31 @@ describe('useSidebar', () => {
       expect(style?.paddingRight).toBeLessThan(paneWidth);
     });
   });
+
+  describe('onResize callback stability', () => {
+    test('onResize callback remains stable when compact mode changes', () => {
+      const { result } = renderHook(() => useSidebar({ hasOpenPane: false, defaultToCompact: false }));
+
+      const initialOnResize = result.current.onResize;
+
+      act(() => {
+        result.current.onResize(30);
+      });
+
+      expect(result.current.onResize).toBe(initialOnResize);
+    });
+
+    test('onResize callback changes when hasOpenPane changes', () => {
+      const { result, rerender } = renderHook(
+        ({ hasOpenPane }: { hasOpenPane: boolean }) => useSidebar({ hasOpenPane }),
+        { initialProps: { hasOpenPane: false } }
+      );
+
+      const initialOnResize = result.current.onResize;
+
+      rerender({ hasOpenPane: true });
+
+      expect(result.current.onResize).not.toBe(initialOnResize);
+    });
+  });
 });
