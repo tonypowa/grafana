@@ -95,6 +95,7 @@ export function getPanelFrameOptions(panel: VizPanel): OptionsPaneCategoryDescri
         title: t('dashboard-scene.get-panel-frame-options.title.description', 'Description'),
         id: 'panel-frame-options-description',
         value: panel.state.description,
+        skipField: true,
         render: function renderDescription(descriptor) {
           return <PanelDescriptionTextArea id={descriptor.props.id} panel={panel} />;
         },
@@ -242,15 +243,17 @@ export function PanelDescriptionTextArea({ panel, id }: { panel: VizPanel; id?: 
         <Trans i18nKey="dashboard.viz-panel.options.description">Description</Trans>
       </Label>
       <Stack>
-        <Label htmlFor="panel-subtitle-switch">
-          <Trans i18nKey="dashboard.viz-panel.options.description-as-subtitle">As subtitle</Trans>
+        <Label
+          htmlFor="panel-subtitle-switch"
+          data-testid={selectors.components.PanelEditor.OptionsPane.fieldLabel('subtitle-switch')}
+        >
+          <Trans i18nKey="dashboard.viz-panel.options.description-as-subtitle">as subtitle</Trans>
         </Label>
         <Switch
           value={!!subtitle}
           id="panel-subtitle-switch"
           onChange={onToggleSubtitle}
-          label={t('dashboard.viz-panel.options.description-as-subtitle', 'As subtitle')}
-          data-testid={selectors.components.PanelEditor.OptionsPane.fieldInput('subtitle-switch')}
+          label={t('dashboard.viz-panel.options.description-as-subtitle', 'as subtitle')}
         />
       </Stack>
     </Stack>

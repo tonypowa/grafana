@@ -23,7 +23,7 @@ export class PanelOptions extends PageObject {
 
   getSubtitleSwitch() {
     return this.dashboardPage.getByGrafanaSelector(
-      this.selectors.components.PanelEditor.OptionsPane.fieldInput('subtitle-switch')
+      this.selectors.components.PanelEditor.OptionsPane.fieldLabel('subtitle-switch')
     );
   }
 
