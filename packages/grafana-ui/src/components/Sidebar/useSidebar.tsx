@@ -155,7 +155,7 @@ export function useSidebar({
         return clamp(prevWidth + diff, 100, maxWidth);
       });
     },
-    [hasOpenPane, setCompact, setPaneWidth, compact]
+    [hasOpenPane, setCompact, setPaneWidth]
   );
 
   const onToggleIsHidden = useCallback(() => setIsHidden((prev) => !prev), [setIsHidden]);
